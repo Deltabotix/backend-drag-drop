@@ -22,11 +22,11 @@ const SCHEMA_FILE = path.join(__dirname, 'schema.sql');
 
 function getConfig() {
   return {
-    host: process.env.MYSQL_HOST || '127.0.0.1',
-    port: Number(process.env.MYSQL_PORT) || 3306,
-    user: process.env.MYSQL_USER || 'u610043941_mishraaadarsh2',
-    password: process.env.MYSQL_PASSWORD || 'One%One=1',
-    database: process.env.MYSQL_DATABASE || 'u610043941_drag_and_drop',
+    host: '127.0.0.1',
+    port: 3306,
+    user: 'u610043941_mishraaadarsh2',
+    password: 'One%One=1',
+    database: 'u610043941_drag_and_drop',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
