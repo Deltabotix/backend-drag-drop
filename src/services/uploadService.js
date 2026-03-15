@@ -11,6 +11,16 @@ const KIT_TO_FQBN = {
   'arduino-nano': 'arduino:avr:nano',
 };
 
+const AVR_CORE = 'arduino:avr';
+let avrCoreInstallPromise = null;
+
+/** Ensure arduino:avr core is installed (for compile). Runs once per process; install is idempotent. */
+async function ensureAvrCore() {
+  if (avrCoreInstallPromise) return avrCoreInstallPromise;
+  avrCoreInstallPromise = runCommand('arduino-cli', ['core', 'install', AVR_CORE], process.cwd(), 300000);
+  return avrCoreInstallPromise;
+}
+
 /**
  * Run a command (e.g. arduino-cli). Rejects on spawn error or timeout so request doesn't hang.
  * @param {number} timeoutMs - Max wait (default 90000 for compile). Pass 0 to skip.
@@ -105,6 +115,7 @@ export async function compileOnly({ code, boardFqbn }) {
   const log = [];
 
   try {
+    await ensureAvrCore();
     log.push('Compiling...');
     const compileResult = await runCommand(
       'arduino-cli',
@@ -191,6 +202,7 @@ export async function compileAndUpload({ code, boardFqbn, port }) {
   const log = [];
 
   try {
+    await ensureAvrCore();
     log.push('Compiling...');
     const compileResult = await runCommand(
       'arduino-cli',
