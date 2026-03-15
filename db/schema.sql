@@ -1,10 +1,11 @@
 -- =============================================================================
--- DRAG_AND_DROP — Single schema file. Update this file only when adding new
--- tables or columns. App runs this on startup (all statements are idempotent).
+-- Single schema file. Update this file only when adding new tables or columns.
+-- App runs this on startup (all statements are idempotent).
+-- DB name must match db/index.js getConfig().database (e.g. u610043941_drag_and_drop).
 -- =============================================================================
 
-CREATE DATABASE IF NOT EXISTS `drag_and_drop`;
-USE `drag_and_drop`;
+CREATE DATABASE IF NOT EXISTS `u610043941_drag_and_drop`;
+USE `u610043941_drag_and_drop`;
 
 -- Tracks which migrations have been applied (legacy, kept for compatibility)
 CREATE TABLE IF NOT EXISTS schema_migrations (
