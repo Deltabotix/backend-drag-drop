@@ -11,9 +11,13 @@ const KIT_TO_FQBN = {
   'arduino-nano': 'arduino:avr:nano',
 };
 
-function runCommand(cmd, args, cwd) {
+/**
+ * Run a command (e.g. arduino-cli). Rejects on spawn error or timeout so request doesn't hang.
+ * @param {number} timeoutMs - Max wait (default 90000 for compile). Pass 0 to skip.
+ */
+function runCommand(cmd, args, cwd, timeoutMs = 90000) {
   const executable = cmd === 'arduino-cli' ? config.arduinoCliPath : cmd;
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const proc = spawn(executable, args, {
       cwd: cwd || undefined,
       shell: false,
@@ -27,12 +31,26 @@ function runCommand(cmd, args, cwd) {
     proc.stderr?.on('data', (d) => {
       stderr += d.toString();
     });
-    proc.on('close', (code) => resolve({ stdout, stderr, code }));
+    proc.on('error', (err) => {
+      clearTimeout(timer);
+      reject(new Error(`arduino-cli failed to start: ${err.message}. Set ARDUINO_CLI_PATH in env.`));
+    });
+    proc.on('close', (code) => {
+      clearTimeout(timer);
+      resolve({ stdout, stderr, code });
+    });
+    const timer =
+      timeoutMs > 0
+        ? setTimeout(() => {
+            proc.kill('SIGKILL');
+            reject(new Error(`arduino-cli timed out after ${timeoutMs / 1000}s.`));
+          }, timeoutMs)
+        : null;
   });
 }
 
 export async function listPorts() {
-  const result = await runCommand('arduino-cli', ['board', 'list', '--format', 'json'], process.cwd());
+  const result = await runCommand('arduino-cli', ['board', 'list', '--format', 'json'], process.cwd(), 15000);
   let ports = [];
   try {
     const out = (result.stdout || '').trim();

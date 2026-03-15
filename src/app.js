@@ -11,6 +11,13 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(routes);
 
+// So any route error returns JSON (no crash → no gateway 503)
+app.use((err, req, res, next) => {
+  console.error('Route error:', err?.message || err);
+  const message = err instanceof Error ? err.message : String(err);
+  res.status(500).json({ success: false, message, log: message });
+});
+
 app.get('/', (req, res) => {
   res.json({ ok: true, name: 'Deltabotix API', port: process.env.PORT || 3000 });
 });
